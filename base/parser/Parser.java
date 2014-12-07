@@ -14,7 +14,6 @@ public class Parser {
 	IProvider<Token> tokenProvider;
 	
 	Expression root;
-	Expression actualNode;
 	
 	/**
 	 * Inicializa uma nova instância de Parser
@@ -36,7 +35,8 @@ public class Parser {
 	}
 	
 	/**
-	 * ArgumentList := Expression | Expression ',' ArgumentList
+	 * Lê a sequência de Tokens que respeitam a gramática:
+	 * ArgumentList ::= Expression | Expression ',' ArgumentList
 	 */
 	LinkedList<Expression> parseArgumentList() throws InvalidSemanticException
 	{
@@ -54,13 +54,14 @@ public class Parser {
 		return result;
 	}
 	/**
+	 * Lê a sequência de Tokens que respeitam a gramática:
 	 * FunctionCall ::= Identifier '(' ')' || Identifier '(' ArgumentList ')'
 	 */
 	Expression parseFunctionCall(Token token) throws InvalidSemanticException
 	{
 		String name = token.getLexeme();
 		Token t = tokenProvider.next();
-		FunctionInvokerExpression result = new FunctionInvokerExpression(name);
+		FunctionInvokerExpression result = new FunctionInvokerExpression(name, OperatorFactory.fromToken(token));
 		
 		if (t.getType() != TokenType.OPEN_PARENTHESES)
 			throw new ExpectedTokenNotFoundException(token, Token.FromType(TokenType.OPEN_PARENTHESES));
@@ -77,7 +78,8 @@ public class Parser {
 		return result;
 	}	
 	/**
-	 * Primary ::= Identifier | Number | '(' Assignment ')' | FunctionCall
+	 * Lê a sequência de Tokens que respeitam a gramática:
+	 * Primary ::= Identifier | Number | '(' Assignment ')' | FunctionCall | Name
 	 * @throws InvalidSemanticException 
 	 */
 	Expression parsePrimary() throws InvalidSemanticException
@@ -104,15 +106,23 @@ public class Parser {
 		{
 			tokenProvider.next();
 			Expression additive = parseAdditive();
-			if (tokenProvider.next().getType() != TokenType.CLOSE_PARENTHESES)
+			token = tokenProvider.next();
+			if (token.getType() != TokenType.CLOSE_PARENTHESES)
 				throw new ExpectedTokenNotFoundException(token, Token.FromType(TokenType.CLOSE_PARENTHESES));
 			
 			return new BracketExpression(additive);
 		}
 		
+		if (t == TokenType.NAME)
+		{
+			tokenProvider.next();
+			return new ConstantExpression(token.getLexeme());
+		}
+		
 		throw new InvalidSemanticException("Token " + token.getType() + " não pode ser processado", token);
 	}
 	/**
+	 * Lê a sequência de Tokens que respeitam a gramática:
 	 * Unary ::= Primary | '-' Unary
 	 */
 	Expression parseUnary() throws InvalidSemanticException
@@ -125,12 +135,14 @@ public class Parser {
 			debug("parseUnary encontrou um " + t);
 			tokenProvider.next();
 			Expression unary = parseUnary();
-			return new UnaryExpression(OperatorFactory.FromToken(token), unary);
+			return new UnaryExpression(OperatorFactory.fromToken(token), unary);
 		}
 		
 		return parsePrimary();
 	}
+	
 	/**
+	 * Lê a sequência de Tokens que respeitam a gramática:
 	 * Multiplicative ::= Unary | Multiplicative '*' Unary | Multiplicative '/' Unary
 	 */
 	Expression parseMultiplicative() throws InvalidSemanticException
@@ -140,16 +152,18 @@ public class Parser {
 		Token token;
 		
 		while((token = tokenProvider.peek()).getType() == TokenType.SIGNAL_MULTIPLICATION ||
-				   					   token.getType() == TokenType.SIGNAL_DIVISION)
+				   					   token.getType() == TokenType.SIGNAL_DIVISION ||
+				   					   token.getType() == TokenType.SIGNAL_EXPONENTIAL)
 		{
 			debug("parseMultiplicative encontrou um " + token.getType());
 			token = tokenProvider.next();
-			expression = new BinaryExpression(expression, parseMultiplicative(), OperatorFactory.FromToken(token));
+			expression = new BinaryExpression(expression, parseMultiplicative(), OperatorFactory.fromToken(token));
 		}
 		
 		return expression;
 	}
 	/**
+	 * Lê a sequência de Tokens que respeitam a gramática:
 	 * Additive ::= Multiplicative | Additive '+' Multiplicative | Additive '-' Multiplicative
 	 */
 	Expression parseAdditive() throws InvalidSemanticException
@@ -163,14 +177,14 @@ public class Parser {
 		{
 			debug("parseAdditive encontrou um " + token.getType());
 			token = tokenProvider.next();
-			expression = new BinaryExpression(expression, parseMultiplicative(), OperatorFactory.FromToken(token));
+			expression = new BinaryExpression(expression, parseMultiplicative(), OperatorFactory.fromToken(token));
 		}
 
 		return expression;
 	}
 	
 	/**
-	 * @return Após executar <b>buildExpressionTree</b>, retorna a Expression gerada
+ 	 * @return Após executar <b>buildExpressionTree</b>, retorna a Expression gerada
 	 */
 	public Expression getGeneratedExpressionTree()
 	{
@@ -179,6 +193,6 @@ public class Parser {
 
 	void debug(String message)
 	{
-		System.out.println(message);
+		//System.out.println(message);
 	}
 }

@@ -4,6 +4,10 @@ public class ExplicitExpression extends Expression {
 
 	double internalValue;
 	
+	/**
+	 * Inicializa uma nova instância de ExplicitExpression
+	 * @param value Valor desta folha
+	 */
 	public ExplicitExpression(double value)
 	{
 		this.internalValue = value;

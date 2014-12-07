@@ -2,17 +2,22 @@ package expressions;
 
 import java.util.*;
 
-/**
- * @author GuilhermeMatheus
- *
- */
+import operators.Operator;
+import utils.InvalidSemanticException;
+
 public class FunctionInvokerExpression extends Expression {
 	Expression internalExpression;
 	LinkedList<Expression> parameters;
 	String name;
+	Operator operator;
 	
-	public FunctionInvokerExpression(String name) {
+	/**
+	 * Inicializa uma nova instância de FunctionInvokerExpression.java
+	 * @param name Nome desta função
+	 */
+	public FunctionInvokerExpression(String name, Operator operator) {
 		this.name = name;
+		this.operator = operator;
 	}
 
 	public String getName()
@@ -21,9 +26,13 @@ public class FunctionInvokerExpression extends Expression {
 	}
 	
 	@Override
-	public double getValue() {
-		//Criar contexto e invocar internalExpression
-		return 0;
+	public double getValue() throws InvalidSemanticException {
+		double[] params = new double[parameters.size()];
+		int i = 0;
+		for(Expression e: parameters)
+			params[i++] = e.getValue();
+		
+		return operator.evaluate(params);
 	}
 	
 	@Override

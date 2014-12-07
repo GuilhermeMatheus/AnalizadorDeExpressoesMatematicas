@@ -1,6 +1,9 @@
 package lexer;
 
 import java.io.*;
+import java.util.*;
+import java.util.concurrent.LinkedBlockingQueue;
+
 import utils.*;
 
 public class Lexer implements IProvider<Token> {
@@ -8,6 +11,7 @@ public class Lexer implements IProvider<Token> {
 	
 	int index;
 	BufferedInputStream  reader;
+	Queue<Token> buffer;
 	
 	/**
 	 * Inicializa uma nova instância de Lexer
@@ -20,31 +24,46 @@ public class Lexer implements IProvider<Token> {
 
 	public void reset() {
 		this.index = 0;
+		this.buffer = new LinkedBlockingQueue<>();
 	}	
-	
+
 	@Override
 	public Token next() {
-		Token token;
-		
+		if (!buffer.isEmpty())
+			return buffer.poll();
+		else
+			return next(false);
+	}
+	
+	Token next(boolean isPeeking)
+	{
+		Token token = null;
+
 		while(hasSymbol())
 		{
 			skipSpaces();
 			
 			if ((token = getExplicitToken()) != null)
-				return token;
+				buffer.add(token);
 			else if ((token = getSignalToken()) != null)
-				return token;			
+				buffer.add(token);			
 			else if ((token = getFunctionOrName()) != null)
-				return token;			
+				buffer.add(token);			
 			else if ((token = getParentheses()) != null)
-				return token;			
+				buffer.add(token);			
 			else if ((token = getComma()) != null)
-				return token;	
-			//throw new Exception("Token inválido encontrado na posição: " + index);
+				buffer.add(token);
 		}		
-				
-		return Token.getEmpty();
+
+		if (token == null)
+			return Token.getEmpty();
+		
+		if (isPeeking)
+			return buffer.peek();
+		else
+			return buffer.poll();
 	}
+	
 	@Override
 	public boolean hasNext()
 	{
@@ -52,6 +71,11 @@ public class Lexer implements IProvider<Token> {
 	}
 	@Override
 	public Token peek() {
+		if (buffer.isEmpty())
+			return next(true);
+		else
+			return buffer.peek();
+		/*
 		int indexBkp = index;
 		reader.mark(10);
 		
@@ -65,7 +89,7 @@ public class Lexer implements IProvider<Token> {
 		} catch (Exception e) {
 			System.out.println(e.getMessage());
 			return Token.getEmpty();
-		}
+		}*/
 	}
 	
 	Token getExplicitToken()
@@ -86,6 +110,7 @@ public class Lexer implements IProvider<Token> {
 			}
 		}
 		
+		//System.out.println("Entrei no EXPLICIT: " + index + ", e sai com " + number);
 		if (number == "")
 			return null;
 		

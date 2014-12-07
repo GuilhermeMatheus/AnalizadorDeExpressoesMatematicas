@@ -1,9 +1,5 @@
 package utils;
 
-/**
- * @author GuilhermeMatheus
- *
- */
 public interface IProvider<T> {
 	/**
 	 * Verifica se a fonte de dados possui próximo item do tipo <b>T</b>

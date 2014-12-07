@@ -1,9 +1,10 @@
 package operators;
 
 public enum OperatorType {
+	FUNCTION,
 	PLUS,
 	MINUS,
 	MULTIPLICATION,
 	DIVISION,
-	CUSTOM
+	EXPONENTIAL
 }

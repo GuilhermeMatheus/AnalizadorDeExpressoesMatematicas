@@ -1,13 +1,8 @@
-/**
- * 
- */
 package expressions;
 
 import operators.*;
+import utils.InvalidSemanticException;
 
-/**
- *
- */
 public class BinaryExpression extends Expression {
 	
 	Operator operator;
@@ -15,6 +10,12 @@ public class BinaryExpression extends Expression {
 	Expression right;
 	Expression left;
 	
+	/**
+	 * Inicializa uma nova instância de BinaryExpression
+	 * @param left Expressão para ser adicionada no ramo da esquerda deste nó
+	 * @param right Expressão para ser adicionada no ramo da direita deste nó
+	 * @param operator Operador que conecta os dois ramos
+	 */
 	public BinaryExpression(Expression left, Expression right, Operator operator) {
 		this.left = left;
 		this.right = right;
@@ -22,9 +23,17 @@ public class BinaryExpression extends Expression {
 	}
 
 	@Override
-	public double getValue() {
-		// TODO Auto-generated method stub
-		return 0;
+	public double getValue() throws InvalidSemanticException
+	{
+		if(left == null)
+			return right.getValue();
+		
+		if (right == null)
+			return left.getValue();
+		
+		double leftValue = left.getValue();
+		double rightValue = right.getValue();
+		return operator.evaluate(leftValue, rightValue);
 	}
 
 	public void setRight(Expression value)
@@ -47,6 +56,10 @@ public class BinaryExpression extends Expression {
 		return this.left;
 	}
 
+	/**
+	 * Adiciona uma expressão filha desta.
+	 * @param child Expressão a ser adicionada
+	 */
 	@Override
 	public void addChild(Expression child) {
 		if (this.left != null)
@@ -63,6 +76,9 @@ public class BinaryExpression extends Expression {
 		throw new IllegalStateException("Tentativa de se adicionar nó à uma expressão binária já cheia.");
 	}
 
+	/**
+	 * @return Retorna true se esta Expressão estiver com espaço disponível para mais um nó ou false, caso contrário
+	 */
 	@Override
 	public boolean getIsAvailable() {
 		return this.left == null || this.right == null;

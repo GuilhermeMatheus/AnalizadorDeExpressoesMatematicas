@@ -1,9 +1,10 @@
 package expressions;
 
 public class ConstantExpression extends Expression {
-
-	public ConstantExpression(Expression dad) {
-		// TODO Auto-generated constructor stub
+	String name;
+	
+	public ConstantExpression(String name) {
+		this.name = name;
 	}
 	
 	@Override

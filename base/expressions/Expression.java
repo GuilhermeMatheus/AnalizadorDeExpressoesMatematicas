@@ -1,8 +1,7 @@
 package expressions;
 
-/**
- *
- */
+import utils.InvalidSemanticException;
+
 public abstract class Expression {
 	Expression parent;
 	
@@ -14,8 +13,9 @@ public abstract class Expression {
 	/**
 	 * Calcula o valor que esta sub-árvore de expressões possui
 	 * @return Retorna o valor desta expressão.
+	 * @throws InvalidSemanticException 
 	 */
-	public abstract double getValue();
+	public abstract double getValue() throws InvalidSemanticException;
 
 	/**
 	 * @return Retorna true se esta Expressão estiver com espaço disponível para mais um nó ou false, caso contrário

@@ -1,27 +1,26 @@
 package expressions;
 
 import operators.Operator;
+import utils.InvalidSemanticException;
 
-/**
- * @author GuilhermeMatheus
- *
- */
 public class UnaryExpression extends Expression {
 	Operator operator;
 	Expression child;
-	
+
+	/**
+	 * Inicializa uma nova instância de UnaryExpression
+	 * @param operator Operador de sinal para este nó
+	 * @param child Expressão filha deste nó
+	 */
 	public UnaryExpression(Operator operator, Expression child)
 	{
 		this.operator = operator;
 		this.addChild(child);
 	}
 	
-	/* (non-Javadoc)
-	 * @see expressions.Expression#getValue()
-	 */
 	@Override
-	public double getValue() {
-		return child.getValue();
+	public double getValue() throws InvalidSemanticException {
+		return operator.evaluate(child.getValue());		
 	}
 
 	@Override

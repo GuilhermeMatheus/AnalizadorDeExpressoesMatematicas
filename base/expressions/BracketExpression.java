@@ -1,5 +1,7 @@
 package expressions;
 
+import utils.InvalidSemanticException;
+
 /**
  * @author GuilhermeMatheus
  *
@@ -10,7 +12,7 @@ public class BracketExpression extends Expression {
 	
 	/**
 	 * Inicializa uma nova instância de BracketExpression.java
-	 * @param child
+	 * @param child Filho desta expressão
 	 */
 	public BracketExpression(Expression child) {
 		addChild(child);
@@ -20,7 +22,7 @@ public class BracketExpression extends Expression {
 	 * @see expressions.Expression#getValue()
 	 */
 	@Override
-	public double getValue() {
+	public double getValue() throws InvalidSemanticException {
 		return child.getValue();
 	}
 
