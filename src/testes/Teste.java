@@ -59,9 +59,27 @@ public class Teste {
 			System.out.printf("%s = %f", expressao, treeResult);
 			
 		} catch (InvalidSemanticException e) {
-			e.printStackTrace();
+			handleError(expressao, e);
 		}
 		
+	}
+	void handleError(String expressao, InvalidSemanticException e)
+	{
+		System.out.printf(expressao);
+		System.out.print("\n");
+		
+		int start = e.getTokenInformation().getStart();
+		int end = e.getTokenInformation().getEnd();
+		start = start == -1 ? expressao.length() : start;
+		end = end == -1 ? start : end;
+		
+		for(int i = 0; i < start; i++)
+			System.out.print(" ");
+		
+		for(int i = 0; i < ((end-=start) > 0 ? end : 1); i++)
+			System.out.print("^");
+		
+		System.out.println("\n" + e.getMessage());
 	}
 	void calcularExpressaoEmArquivo()
 	{

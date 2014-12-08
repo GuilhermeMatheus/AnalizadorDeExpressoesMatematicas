@@ -60,9 +60,10 @@ public class Token {
 	 */
 	public static Token getEmpty()
 	{
-		Token result = new Token(TokenType.UNKNOWN);
+		Token result = new Token(TokenType.EMPTY);
 		result.isEmpty = true;
-		
+		result.start = -1;
+		result.end = -1;
 		return result;
 	}
 

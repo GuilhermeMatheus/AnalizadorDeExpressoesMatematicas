@@ -12,5 +12,6 @@ public enum TokenType {
 	NAME,
 	FUNCTION,
 	COMMA,
-	UNKNOWN
+	UNKNOWN,
+	EMPTY
 }

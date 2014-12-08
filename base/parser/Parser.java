@@ -32,6 +32,14 @@ public class Parser {
 	public void buildExpressionTree() throws InvalidSemanticException
 	{
 		root = parseAdditive();
+		
+		Token t;
+		if ((t = tokenProvider.peek()) == null)
+			return;
+		
+		TokenType nextTokenType = t.getType();
+		if (nextTokenType != TokenType.EMPTY)
+			throw new InvalidSemanticException("Token " + nextTokenType + " inesperado.", t);
 	}
 	
 	/**
@@ -140,7 +148,25 @@ public class Parser {
 		
 		return parsePrimary();
 	}
-	
+	/**
+	 * Lê a sequência de Tokens que respeitam a gramática:
+	 * Exponential ::= Unary | Exponential '^' Unary
+	 */
+	Expression parseExponential()  throws InvalidSemanticException
+	{
+		debug("parseExponential");
+		Expression expression = parseUnary();
+		Token token;
+		
+		while((token = tokenProvider.peek()).getType() == TokenType.SIGNAL_EXPONENTIAL)
+		{
+			debug("parseExponential encontrou um " + token.getType());
+			token = tokenProvider.next();
+			expression = new BinaryExpression(expression, parseExponential(), OperatorFactory.fromToken(token));
+		}
+		
+		return expression;
+	}	
 	/**
 	 * Lê a sequência de Tokens que respeitam a gramática:
 	 * Multiplicative ::= Unary | Multiplicative '*' Unary | Multiplicative '/' Unary
@@ -148,16 +174,15 @@ public class Parser {
 	Expression parseMultiplicative() throws InvalidSemanticException
 	{
 		debug("parseMultiplicative");
-		Expression expression = parseUnary();
+		Expression expression = parseExponential();
 		Token token;
 		
 		while((token = tokenProvider.peek()).getType() == TokenType.SIGNAL_MULTIPLICATION ||
-				   					   token.getType() == TokenType.SIGNAL_DIVISION ||
-				   					   token.getType() == TokenType.SIGNAL_EXPONENTIAL)
+				   					   token.getType() == TokenType.SIGNAL_DIVISION)
 		{
 			debug("parseMultiplicative encontrou um " + token.getType());
 			token = tokenProvider.next();
-			expression = new BinaryExpression(expression, parseMultiplicative(), OperatorFactory.fromToken(token));
+			expression = new BinaryExpression(expression, parseExponential(), OperatorFactory.fromToken(token));
 		}
 		
 		return expression;
